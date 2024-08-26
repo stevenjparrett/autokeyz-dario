@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaKey, FaLockOpen, FaCar, FaClock } from 'react-icons/fa';
 
-const OurServices: React.FC = () => {
-  const services = [
+const OurServices = React.memo(() => {
+  const services = useMemo(() => [
     {
       name: "Spare Keys",
       description: "Including mobile visit, spare car key supplied and programmed, with a 12-month guarantee.",
@@ -27,7 +27,36 @@ const OurServices: React.FC = () => {
       icon: <FaClock />,
       keywords: "emergency call out, car lockout service, emergency car key replacement, vehicle opening",
     },
-  ];
+  ], []);
+
+  const structuredData = useMemo(() => JSON.stringify({
+    "@context": "http://schema.org",
+    "@type": "Service",
+    "serviceType": "Automotive Key Services",
+    "provider": {
+      "@type": "Organization",
+      "name": "AutoKeyz",
+      "url": "https://www.autokeyz.com/",
+      "logo": "https://www.autokeyz.com/images/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/autokeyz",
+        "https://twitter.com/autokeyz",
+        "https://www.instagram.com/autokeyz"
+      ]
+    },
+    "areaServed": {
+      "@type": "Place",
+      "name": "Ashford, Kent"
+    },
+    "service": services.map(service => ({
+      "@type": "Offer",
+      "name": service.name,
+      "description": service.description,
+      "keywords": service.keywords,
+      // Corrected image reference to a plausible URL instead of trying to use React element
+      "image": `https://www.autokeyz.com/images/${service.name.replace(/ /g, '').toLowerCase()}-logo.png`
+    }))
+  }), [services]);
 
   return (
     <section className="bg-gray-900 p-6 my-6 rounded-lg text-white text-center md:text-left" aria-label="Our Car Key Services">
@@ -49,37 +78,9 @@ const OurServices: React.FC = () => {
       </div>
       
       {/* Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "http://schema.org",
-          "@type": "Service",
-          "serviceType": "Automotive Key Services",
-          "provider": {
-            "@type": "Organization",
-            "name": "AutoKeyz",
-            "url": "https://www.autokeyz.com/",
-            "logo": "https://www.autokeyz.com/images/logo.png",
-            "sameAs": [
-              "https://www.facebook.com/autokeyz",
-              "https://twitter.com/autokeyz",
-              "https://www.instagram.com/autokeyz"
-            ]
-          },
-          "areaServed": {
-            "@type": "Place",
-            "name": "Ashford, Kent"
-          },
-          "service": services.map(service => ({
-            "@type": "Offer",
-            "name": service.name,
-            "description": service.description,
-            "keywords": service.keywords,
-            "image": `https://www.autokeyz.com/${service.icon}`
-          }))
-        })}
-      </script>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
     </section>
   );
-};
+});
 
 export default OurServices;

@@ -25,23 +25,29 @@ const ContactForm: React.FC = () => {
     doesVehicleRunAndDrive: ''
   });
 
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+
+  // Handler to update form data
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  // Handler to submit the form
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    fetch('http://162.0.229.131:3001/api/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(formData as any)
-    })
-    .then(response => {
+    try {
+      const response = await fetch('https://162.0.229.131:3001/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
       if (response.ok) {
-        alert('Message sent successfully!');
+        setSubmitStatus('Message sent successfully!');
+        // Reset the form after successful submission
         setFormData({
           name: '',
           phoneNumber: '',
@@ -56,11 +62,10 @@ const ContactForm: React.FC = () => {
       } else {
         throw new Error('Failed to send message.');
       }
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error:', error);
-      alert('Error sending message.');
-    });
+      setSubmitStatus('Error sending message.');
+    }
   };
 
   return (
@@ -75,20 +80,25 @@ const ContactForm: React.FC = () => {
           <p className="text-lg mb-6">
             You can also reach out to us via WhatsApp for quick assistance.
           </p>
-          <button
-            onClick={() => window.open('https://wa.me/447769017971', '_blank')}
+          {/* WhatsApp button optimized with direct link */}
+          <a
+            href="https://wa.me/447769017971"
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-green-500 flex items-center justify-center space-x-2 py-2 px-4 rounded-full hover:bg-green-600 transition-colors"
           >
             <img src="images/whatsapp-icon.png" alt="WhatsApp" className="w-6 h-6" />
             <span>WhatsApp Us</span>
-          </button>
+          </a>
+          {/* Lazy loading the image for performance */}
           <div className="mt-8">
-            <img src="images/getintouch.jpeg" alt="Contact Us" className="rounded-lg shadow-lg max-w-full h-auto" />
+            <img src="images/getintouch.jpeg" alt="Contact Us" className="rounded-lg shadow-lg max-w-full h-auto" loading="lazy" />
           </div>
         </div>
         {/* Form Section */}
         <div className="lg:w-1/2 bg-white p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Input Fields */}
             <input
               type="text"
               name="name"
@@ -114,7 +124,7 @@ const ContactForm: React.FC = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900  focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
             />
             <input
               type="text"
@@ -123,7 +133,7 @@ const ContactForm: React.FC = () => {
               required
               value={formData.postCode}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900  focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
             />
             <input
               type="text"
@@ -139,7 +149,7 @@ const ContactForm: React.FC = () => {
               placeholder="Vehicle Registration"
               value={formData.vehicleRegistration}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900  focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
             />
             <textarea
               name="message"
@@ -149,18 +159,43 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
             ></textarea>
+            {/* Boolean Buttons */}
             <div className="flex justify-between items-center gap-4">
               <label className="font-bold text-black">Is Vehicle Locked?</label>
               <div className="flex gap-2">
-                <button type="button" className={`py-2 px-4 rounded-full ${formData.isVehicleLocked === 'Yes' ? 'bg-green-500 text-white' : 'bg-gray-300 hover:bg-green-500 transition-colors'}`} onClick={() => setFormData({...formData, isVehicleLocked: 'Yes'})}>Yes</button>
-                <button type="button" className={`py-2 px-4 rounded-full ${formData.isVehicleLocked === 'No' ? 'bg-red-500 text-white' : 'bg-gray-300 hover:bg-red-500 transition-colors'}`} onClick={() => setFormData({...formData, isVehicleLocked: 'No'})}>No</button>
+                <button
+                  type="button"
+                  className={`py-2 px-4 rounded-full ${formData.isVehicleLocked === 'Yes' ? 'bg-green-500 text-white' : 'bg-gray-300 hover:bg-green-500 transition-colors'}`}
+                  onClick={() => setFormData({ ...formData, isVehicleLocked: 'Yes' })}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className={`py-2 px-4 rounded-full ${formData.isVehicleLocked === 'No' ? 'bg-red-500 text-white' : 'bg-gray-300 hover:bg-red-500 transition-colors'}`}
+                  onClick={() => setFormData({ ...formData, isVehicleLocked: 'No' })}
+                >
+                  No
+                </button>
               </div>
             </div>
             <div className="flex justify-between items-center gap-4">
               <label className="font-bold text-black">Does Vehicle Run And Drive?</label>
               <div className="flex gap-2">
-                <button type="button" className={`py-2 px-4 rounded-full ${formData.doesVehicleRunAndDrive === 'Yes' ? 'bg-green-500 text-white' : 'bg-gray-300 hover:bg-green-500 transition-colors'}`} onClick={() => setFormData({...formData, doesVehicleRunAndDrive: 'Yes'})}>Yes</button>
-                <button type="button" className={`py-2 px-4 rounded-full ${formData.doesVehicleRunAndDrive === 'No' ? 'bg-red-500 text-white' : 'bg-gray-300 hover:bg-red-500 transition-colors'}`} onClick={() => setFormData({...formData, doesVehicleRunAndDrive: 'No'})}>No</button>
+                <button
+                  type="button"
+                  className={`py-2 px-4 rounded-full ${formData.doesVehicleRunAndDrive === 'Yes' ? 'bg-green-500 text-white' : 'bg-gray-300 hover:bg-green-500 transition-colors'}`}
+                  onClick={() => setFormData({ ...formData, doesVehicleRunAndDrive: 'Yes' })}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className={`py-2 px-4 rounded-full ${formData.doesVehicleRunAndDrive === 'No' ? 'bg-red-500 text-white' : 'bg-gray-300 hover:bg-red-500 transition-colors'}`}
+                  onClick={() => setFormData({ ...formData, doesVehicleRunAndDrive: 'No' })}
+                >
+                  No
+                </button>
               </div>
             </div>
             <button
@@ -170,6 +205,11 @@ const ContactForm: React.FC = () => {
               Submit
             </button>
           </form>
+          {submitStatus && (
+            <div className={`mt-4 p-4 rounded-lg ${submitStatus.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {submitStatus}
+            </div>
+          )}
         </div>
       </div>
     </section>

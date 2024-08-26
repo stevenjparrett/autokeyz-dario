@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo, ReactNode } from 'react';
 
+// Interface for props
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;  // This specifies that the children prop can be any valid React node.
 }
-  
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+
+const Layout = memo<LayoutProps>(({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleScroll = (element: string) => {
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  const handleScroll = useCallback((element: string) => {
     const section = document.getElementById(element);
     section?.scrollIntoView({ behavior: "smooth" });
     setIsMenuOpen(false);
-  };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
@@ -20,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <h1 className="text-xl md:text-3xl font-bold ml-10">Auto Keyz</h1>
           <button
             aria-label="Menu"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={toggleMenu}
             className="md:hidden z-40"
           >
             <svg
@@ -48,11 +53,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="flex-grow w-full">
         {children}
       </main>
-      <footer className="bg-gray-8000 text-white w-full p-4">
+      <footer className="bg-gray-800 text-white w-full p-4">
         <p className="text-center">© 2024 Auto Keyz - All rights reserved.</p>
       </footer>
     </div>
   );
-};
+});
 
 export default Layout;

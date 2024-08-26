@@ -2,20 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Layout from "../components/Layout";
-import OurServices from "../components/OurServices";
-import Pricing from "../components/Pricing";
-import ContactForm from "../components/ContactForm";
-import AboutUs from "../components/AboutUs";
-import OurBrands from "../components/OurBrands";
-import Parallax from "@/components/Parallax";
 import "../app/globals.css";
+
+// Dynamically import components with optimization
+const OurServices = dynamic(() => import("../components/OurServices"), { ssr: false });
+const Pricing = dynamic(() => import("../components/Pricing"), { ssr: false });
+const ContactForm = dynamic(() => import("../components/ContactForm"), { ssr: false });
+const AboutUs = dynamic(() => import("../components/AboutUs"), { ssr: false });
+const OurBrands = dynamic(() => import("../components/OurBrands"), { ssr: false });
+const Parallax = dynamic(() => import("@/components/Parallax"), { ssr: false });
 
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    setIsVisible(true);
+    const timeoutId = setTimeout(() => setIsVisible(true), 300); // Delay visibility to avoid flash of unstyled content (FOUC)
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleScrollToContact = () => {
@@ -34,12 +39,28 @@ const HomePage: React.FC = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="robots" content="index, follow" />
         <meta name="author" content="Auto Keyz" />
-        <meta name="keywords" content="Jaguar key replacement, Land Rover key replacement, car key services, automotive locksmith, emergency key service" />
+        <meta
+          name="keywords"
+          content="Jaguar key replacement, Land Rover key replacement, car key services, automotive locksmith, emergency key service"
+        />
         <link rel="icon" href="/favicon.ico" />
+        
+        {/* Preload and preconnect for fonts to avoid render-blocking */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
           rel="stylesheet"
+          media="print"
+          onLoad={(e) => (e.target as HTMLLinkElement).media = 'all'}
         />
+        <noscript>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+            rel="stylesheet"
+          />
+        </noscript>
+        
         <link rel="canonical" href="https://www.autokeyz.com/" />
         
         {/* Structured Data */}
@@ -130,22 +151,25 @@ const HomePage: React.FC = () => {
 
             {/* Right Column for Image */}
             <div className="w-full lg:w-1/2 flex justify-center items-center mt-8 lg:mt-0">
-              <img
-                src="/images/carkey.png"
+              <Image
+                src="/images/carkeyporsche.png"
                 alt="Jaguar Land Rover Car Key Replacement"
+                width={400}
+                height={300}
                 className="w-full max-w-xs md:max-w-md h-auto object-cover"
+                loading="lazy" // Lazy load image for performance optimization
               />
             </div>
           </div>
         </div>
 
-        <section id="about" className="">
+        <section id="about">
           <AboutUs />
         </section>
         <section id="brands" className="py-8">
           <OurBrands />
         </section>
-        <section id="parallax" className="">
+        <section id="parallax">
           <Parallax />
         </section>
         <section id="services" className="py-8">
@@ -154,7 +178,7 @@ const HomePage: React.FC = () => {
         <section id="pricing" className="pt-8">
           <Pricing />
         </section>
-        <section id="contact" className="">
+        <section id="contact">
           <ContactForm />
         </section>
       </Layout>

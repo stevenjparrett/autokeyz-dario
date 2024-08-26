@@ -1,22 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
-const OurBrands: React.FC = () => {
-  const brands = [
+const OurBrands = () => {
+  const brands = useMemo(() => [
     { src: 'images/landrover-logo.png', alt: 'Land Rover', name: 'Land Rover' },
     { src: 'images/rangerover-logo.png', alt: 'Range Rover', name: 'Range Rover' },
     { src: 'images/jaguar-logo.png', alt: 'Jaguar', name: 'Jaguar' },
     { src: 'images/porsche-logo.png', alt: 'Porsche', name: 'Porsche' }
-  ];
+  ], []);
 
   const [currentBrandIndex, setCurrentBrandIndex] = useState(0);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentBrandIndex((prevIndex) => (prevIndex + 1) % brands.length);
-  };
+  }, [brands.length]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentBrandIndex((prevIndex) => (prevIndex - 1 + brands.length) % brands.length);
-  };
+  }, [brands.length]);
+
+  const structuredData = useMemo(() => ({
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": "AutoKeyz",
+    "url": "https://www.autokeyz.com/",
+    "logo": "https://www.autokeyz.com/images/logo.png",
+    "sameAs": [
+      "https://www.facebook.com/autokeyz",
+      "https://twitter.com/autokeyz",
+      "https://www.instagram.com/autokeyz"
+    ],
+    "brand": brands.map(brand => ({
+      "@type": "Brand",
+      "name": brand.name,
+      "logo": `https://www.autokeyz.com/${brand.src}`
+    }))
+  }), [brands]);
 
   return (
     <section className="bg-gray-900 p-6 my-6 rounded-lg text-white text-center md:text-left">
@@ -41,25 +59,7 @@ const OurBrands: React.FC = () => {
         </div>
       </div>
       {/* Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "http://schema.org",
-          "@type": "Organization",
-          "name": "AutoKeyz",
-          "url": "https://www.autokeyz.com/",
-          "logo": "https://www.autokeyz.com/images/logo.png",
-          "sameAs": [
-            "https://www.facebook.com/autokeyz",
-            "https://twitter.com/autokeyz",
-            "https://www.instagram.com/autokeyz"
-          ],
-          "brand": brands.map(brand => ({
-            "@type": "Brand",
-            "name": brand.name,
-            "logo": `https://www.autokeyz.com/${brand.src}`
-          }))
-        })}
-      </script>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
     </section>
   );
 };

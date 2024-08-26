@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaKey, FaLockOpen, FaCar, FaClock } from 'react-icons/fa';
 
-const Pricing: React.FC = () => {
-  const pricingDetails = [
+const Pricing = React.memo(() => {
+  const pricingDetails = useMemo(() => [
     {
       title: "Spare Keys",
       price: "From £190",
@@ -35,7 +35,37 @@ const Pricing: React.FC = () => {
       extraInfo: "Designed for emergency situations where quick access to your vehicle is crucial.",
       keywords: "emergency call out, car lockout service, emergency car key replacement, vehicle opening"
     }
-  ];
+  ], []);
+
+  const structuredData = useMemo(() => JSON.stringify({
+    "@context": "http://schema.org",
+    "@type": "Service",
+    "serviceType": "Automotive Key Services Pricing",
+    "provider": {
+      "@type": "Organization",
+      "name": "AutoKeyz",
+      "url": "https://www.autokeyz.com/",
+      "logo": "https://www.autokeyz.com/images/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/autokeyz",
+        "https://twitter.com/autokeyz",
+        "https://www.instagram.com/autokeyz"
+      ]
+    },
+    "areaServed": {
+      "@type": "Place",
+      "name": "Ashford, Kent"
+    },
+    "service": pricingDetails.map(pricing => ({
+      "@type": "Offer",
+      "name": pricing.title,
+      "description": pricing.details,
+      "priceCurrency": "GBP",
+      "price": pricing.price.replace(/[^0-9.]/g, ""),
+      "additionalType": pricing.extraInfo,
+      "keywords": pricing.keywords
+    }))
+  }), [pricingDetails]);
 
   return (
     <section 
@@ -61,47 +91,15 @@ const Pricing: React.FC = () => {
               <p className="text-xl font-semibold mb-2">{pricing.price}</p>
               <p className="text-gray-300 mb-4">{pricing.details}</p>
               <p className="text-gray-400 italic">{pricing.extraInfo}</p>
-              <meta name="keywords" content={pricing.keywords} />
             </div>
           ))}
         </div>
       </div>
       
       {/* Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "http://schema.org",
-          "@type": "Service",
-          "serviceType": "Automotive Key Services Pricing",
-          "provider": {
-            "@type": "Organization",
-            "name": "AutoKeyz",
-            "url": "https://www.autokeyz.com/",
-            "logo": "https://www.autokeyz.com/images/logo.png",
-            "sameAs": [
-              "https://www.facebook.com/autokeyz",
-              "https://twitter.com/autokeyz",
-              "https://www.instagram.com/autokeyz"
-            ]
-          },
-          "areaServed": {
-            "@type": "Place",
-            "name": "Ashford, Kent"
-          },
-          "service": pricingDetails.map(pricing => ({
-            "@type": "Offer",
-            "name": pricing.title,
-            "description": pricing.details,
-            "priceCurrency": "GBP",
-            "price": pricing.price.replace(/[^0-9.]/g, ""),
-            "additionalType": pricing.extraInfo,
-            "keywords": pricing.keywords,
-            "image": `https://www.autokeyz.com/images/${pricing.icon}`
-          }))
-        })}
-      </script>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
     </section>
   );
-};
+});
 
 export default Pricing;
