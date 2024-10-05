@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Layout from "../components/Layout";
 import "../app/globals.css";
+import ParallaxComponent from "@/components/Parallax";
+import { ParallaxProvider } from "react-scroll-parallax";
 
 // Dynamically import components with optimization
 const OurServices = dynamic(() => import("../components/OurServices"), { ssr: false });
@@ -123,7 +125,7 @@ const HomePage: React.FC = () => {
                 Auto Keyz
               </h1>
               <p
-                className={`text-gray-200 text-lg md:text-xl lg:text-2xl transition-opacity duration-700 delay-1000 ${
+                className={`text-gray-200 text-left text-lg md:text-xl lg:text-2xl transition-opacity duration-700 delay-1000 ${
                   isVisible ? "opacity-100" : "opacity-0"
                 }`}
               >
@@ -152,14 +154,18 @@ const HomePage: React.FC = () => {
             {/* Right Column for Image */}
             <div className="w-full lg:w-1/2 flex justify-center items-center mt-8 lg:mt-0">
               <Image
-                src="/images/carkeyporsche.png"
+                src="/images/pepskey2.png"
                 alt="Jaguar Land Rover Car Key Replacement"
                 width={400}
                 height={300}
                 className="w-full max-w-xs md:max-w-md h-auto object-cover"
-                loading="lazy" // Lazy load image for performance optimization
+                sizes="(max-width: 768px) 100vw,
+                      (max-width: 1024px) 50vw,
+                      33vw"
+                priority
               />
             </div>
+
           </div>
         </div>
 
@@ -170,7 +176,9 @@ const HomePage: React.FC = () => {
           <OurBrands />
         </section>
         <section id="parallax">
-          <Parallax />
+          <ParallaxProvider>
+            <ParallaxComponent />
+          </ParallaxProvider>
         </section>
         <section id="services" className="py-8">
           <OurServices />

@@ -1,4 +1,7 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+// components/ContactForm.tsx
+
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import Image from 'next/image';
 
 interface FormData {
   name: string;
@@ -6,7 +9,7 @@ interface FormData {
   email: string;
   postCode: string;
   vehicleModel: string;
-  vehicleRegistration: string;
+  vehicleYear: string; // Changed from vehicleRegistration to vehicleYear
   message: string;
   isVehicleLocked: string;
   doesVehicleRunAndDrive: string;
@@ -19,16 +22,41 @@ const ContactForm: React.FC = () => {
     email: '',
     postCode: '',
     vehicleModel: '',
-    vehicleRegistration: '',
+    vehicleYear: '', // Updated field
     message: '',
     isVehicleLocked: '',
     doesVehicleRunAndDrive: ''
   });
 
   const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
+
+  // Update currentYear each January 1st
+  useEffect(() => {
+    const now = new Date();
+    const nextYear = now.getFullYear() + 1;
+    const januaryFirst = new Date(nextYear, 0, 1);
+    const timeUntilNextYear = januaryFirst.getTime() - now.getTime();
+
+    const timer = setTimeout(() => {
+      setCurrentYear(nextYear);
+    }, timeUntilNextYear);
+
+    return () => clearTimeout(timer);
+  }, [currentYear]);
+
+  // Generate vehicle years from 2007 to currentYear
+  const generateVehicleYears = () => {
+    const years = [];
+    for (let year = 2007; year <= currentYear; year++) {
+      years.push(year);
+    }
+    return years;
+  };
 
   // Handler to update form data
-  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -36,16 +64,22 @@ const ContactForm: React.FC = () => {
   // Handler to submit the form
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    console.log('Form submission initiated');
+    setSubmitStatus(null); // Reset status on new submission
+    setIsSubmitting(true); // Indicate form submission in progress
     try {
-      const response = await fetch('https://162.0.229.131:3001/api/contact', {
+      console.log('Sending fetch request to /api/contact');
+      const response = await fetch('/api/contact', { // Use relative path
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData)
       });
-
+      console.log('Fetch response received:', response);
       if (response.ok) {
+        const result = await response.json();
+        console.log('Email sent successfully:', result);
         setSubmitStatus('Message sent successfully!');
         // Reset the form after successful submission
         setFormData({
@@ -54,17 +88,21 @@ const ContactForm: React.FC = () => {
           email: '',
           postCode: '',
           vehicleModel: '',
-          vehicleRegistration: '',
+          vehicleYear: '',
           message: '',
           isVehicleLocked: '',
           doesVehicleRunAndDrive: ''
         });
       } else {
-        throw new Error('Failed to send message.');
+        const errorData = await response.json();
+        console.log('Error response from server:', errorData);
+        setSubmitStatus(`Error: ${errorData.error || 'Failed to send message.'}`);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error during form submission:', error);
       setSubmitStatus('Error sending message.');
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
   };
 
@@ -87,12 +125,22 @@ const ContactForm: React.FC = () => {
             rel="noopener noreferrer"
             className="bg-green-500 flex items-center justify-center space-x-2 py-2 px-4 rounded-full hover:bg-green-600 transition-colors"
           >
-            <img src="images/whatsapp-icon.png" alt="WhatsApp" className="w-6 h-6" />
+            <img src="/images/whatsapp-icon.png" alt="WhatsApp" className="w-6 h-6" />
             <span>WhatsApp Us</span>
           </a>
           {/* Lazy loading the image for performance */}
           <div className="mt-8">
-            <img src="images/getintouch.jpeg" alt="Contact Us" className="rounded-lg shadow-lg max-w-full h-auto" loading="lazy" />
+            <Image
+              src="/images/getintouch.jpeg"
+              alt="Contact Us"
+              className="rounded-lg shadow-lg max-w-full h-auto"
+              width={600}
+              height={400}
+              sizes="(max-width: 768px) 100vw,
+                    (max-width: 1024px) 50vw,
+                    33vw"
+              loading="lazy"
+            />
           </div>
         </div>
         {/* Form Section */}
@@ -106,7 +154,7 @@ const ContactForm: React.FC = () => {
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             />
             <input
               type="tel"
@@ -115,7 +163,7 @@ const ContactForm: React.FC = () => {
               required
               value={formData.phoneNumber}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             />
             <input
               type="email"
@@ -124,7 +172,7 @@ const ContactForm: React.FC = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             />
             <input
               type="text"
@@ -133,35 +181,41 @@ const ContactForm: React.FC = () => {
               required
               value={formData.postCode}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             />
             <input
               type="text"
               name="vehicleModel"
-              placeholder="Vehicle Model"
+              placeholder="Vehicle Model *"
+              required
               value={formData.vehicleModel}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             />
-            <input
-              type="text"
-              name="vehicleRegistration"
-              placeholder="Vehicle Registration"
-              value={formData.vehicleRegistration}
+            {/* Vehicle Year Dropdown */}
+            <select
+              name="vehicleYear"
+              value={formData.vehicleYear}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
-            />
+              required
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 bg-white"
+            >
+              <option value="" disabled className="text-gray-500">Vehicle Year *</option>
+              {generateVehicleYears().map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
             <textarea
               name="message"
               rows={4}
               placeholder="How can we help you?"
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900"
+              className="w-full p-4 rounded-lg border-2 border-gray-900 focus:outline-none text-gray-900 placeholder-gray-500"
             ></textarea>
             {/* Boolean Buttons */}
             <div className="flex justify-between items-center gap-4">
-              <label className="font-bold text-black">Is Vehicle Locked?</label>
+              <label className="font-bold text-black">Is Vehicle Locked? *</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -180,7 +234,7 @@ const ContactForm: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <label className="font-bold text-black">Does Vehicle Run And Drive?</label>
+              <label className="font-bold text-black">Does Vehicle Run And Drive? *</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -200,9 +254,10 @@ const ContactForm: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              className={`w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting}
             >
-              Submit
+              {isSubmitting ? 'Sending...' : 'Submit'}
             </button>
           </form>
           {submitStatus && (

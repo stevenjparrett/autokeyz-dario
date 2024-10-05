@@ -1,12 +1,15 @@
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true, 
-  swcMinify: true, 
+  reactStrictMode: true,
+  swcMinify: true,
+  compress: true,
 
   images: {
-    domains: ['autokeyz.co.uk'], 
-    formats: ['image/avif', 'image/webp'], 
-    unoptimized: false, 
+    domains: ['autokeyz.co.uk', 'd32fkr3mt63h38.cloudfront.net'],
+    formats: ['image/avif', 'image/webp'],
+    // 'unoptimized' is not set, enabling Next.js Image Optimization
   },
 
   async headers() {
@@ -20,7 +23,8 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://trusted-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://trusted-api.com; font-src 'self';",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://trusted-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://trusted-api.com; font-src 'self';",
           },
           {
             key: 'X-Content-Type-Options',
@@ -40,7 +44,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizeCss: true, 
+    optimizeCss: true,
   },
 
   webpack(config, { isServer }) {
@@ -56,4 +60,7 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Export the configuration using the Bundle Analyzer
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})(nextConfig);

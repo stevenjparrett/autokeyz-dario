@@ -13,7 +13,7 @@ const OurBrands = () => {
   const handleNext = useCallback(() => {
     setCurrentBrandIndex((prevIndex) => (prevIndex + 1) % brands.length);
   }, [brands.length]);
-
+  
   const handlePrev = useCallback(() => {
     setCurrentBrandIndex((prevIndex) => (prevIndex - 1 + brands.length) % brands.length);
   }, [brands.length]);

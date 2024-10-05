@@ -5,23 +5,27 @@
   "scripts": {
     "start-server": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" server.ts",
     "start-dev": "concurrently \"npm run dev\" \"npm run start-server\"",
-    "dev": "next dev -H 127.0.0.1",
-    "build": "next build",
+    "dev": "next dev",
+    "build": "npm run build",
     "start": "next start",
     "lint": "next lint",
     "export": "next export"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.662.0",
+    "@next/bundle-analyzer": "^14.2.14",
     "cors": "^2.8.5",
     "critters": "^0.0.24",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "next": "14.1.4",
+    "next": "^14.2.13",
     "node": "^18.20.0",
     "nodemailer": "^6.9.13",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^5.2.1"
+    "react-icons": "^5.2.1",
+    "react-scroll-parallax": "^3.4.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
