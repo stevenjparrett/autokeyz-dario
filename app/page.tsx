@@ -184,9 +184,7 @@ const HomePage: React.FC = () => {
           <OurServices />
         </section>
         <section id="pricing" className="pt-8">
-          <ParallaxProvider>
-            <Pricing />
-          </ParallaxProvider>
+          <Pricing />
         </section>
         <section id="contact">
           <ContactForm />
