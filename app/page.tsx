@@ -177,14 +177,16 @@ const HomePage: React.FC = () => {
         </section>
         <section id="parallax">
           <ParallaxProvider>
-          <ParallaxComponent />
+            <ParallaxComponent />
           </ParallaxProvider>
         </section>
         <section id="services" className="py-8">
           <OurServices />
         </section>
         <section id="pricing" className="pt-8">
-          <Pricing />
+          <ParallaxProvider>
+            <Pricing />
+          </ParallaxProvider>
         </section>
         <section id="contact">
           <ContactForm />
